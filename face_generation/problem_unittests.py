@@ -120,10 +120,11 @@ def test_model_loss(model_loss):
     input_real = tf.placeholder(tf.float32, [None, 28, 28, out_channel_dim])
     input_z = tf.placeholder(tf.float32, [None, 100])
 
-    d_loss, g_loss = model_loss(input_real, input_z, out_channel_dim)
+    d_loss, g_loss, surrogate_generator_loss = model_loss(input_real, input_z, out_channel_dim)
 
     _assert_tensor_shape(d_loss, [], 'Discriminator Loss')
-    _assert_tensor_shape(d_loss, [], 'Generator Loss')
+    _assert_tensor_shape(g_loss, [], 'Generator Loss')
+    _assert_tensor_shape(surrogate_generator_loss, [], 'Surrogate Generator Loss')
 
 
 @test_safe
@@ -141,10 +142,13 @@ def test_model_opt(model_opt, tf_module):
         g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
             logits=generator_logits,
             labels=[[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0]]))
+        surrogate_generator_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            logits=generator_logits,
+            labels=[[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0]]))
         learning_rate = 0.001
         beta1 = 0.9
 
-        d_train_opt, g_train_opt = model_opt(d_loss, g_loss, learning_rate, beta1)
+        d_train_opt, g_train_opt, surrogate_generator_train_opt = model_opt(d_loss, g_loss, surrogate_generator_loss, learning_rate, beta1)
         assert mock_trainable_variables.called,\
             'tf.mock_trainable_variables not called'
 
