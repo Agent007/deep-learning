@@ -120,7 +120,7 @@ def test_model_loss(model_loss):
     input_real = tf.placeholder(tf.float32, [None, 28, 28, out_channel_dim])
     input_z = tf.placeholder(tf.float32, [None, 100])
 
-    d_loss, g_loss, surrogate_generator_loss = model_loss(input_real, input_z, out_channel_dim)
+    d_loss, g_loss, surrogate_generator_loss, merged_summary = model_loss(input_real, input_z, out_channel_dim)
 
     _assert_tensor_shape(d_loss, [], 'Discriminator Loss')
     _assert_tensor_shape(g_loss, [], 'Generator Loss')
